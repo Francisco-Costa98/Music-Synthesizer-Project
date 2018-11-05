@@ -9,17 +9,21 @@ setup	movlw	0x00
 	
 main	code
 start	clrf	TRISD	
-	movlw	0xAA
+	movlw	0x00
 	movwf	PORTD, ACCESS
 	call	clock_pulse
 	movlw	0xFF
 	movwf	0x20
+	movwf	0x21
+	movwf	0x22
 	call	delay
 	movlw	0xFF
 	movwf	PORTD, ACCESS
 	call	clock_pulse
 	movlw	0xFF
 	movwf	0x20
+	movwf	0x21
+	movwf	0x22
 	call	delay
 	goto	start
 	
@@ -35,6 +39,18 @@ clock_pulse
 	
 delay	decfsz 0x20 ; decrement until zero
 	bra delay	
+	call delay2
 	return
 
+delay2	decfsz 0x21 ; decrement until zero
+	bra delay2	
+	call delay3
+	return
+	
+	
+delay3	decfsz 0x22 ; decrement until zero
+	bra delay3	
+	return
+	
+	
 	end
