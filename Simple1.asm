@@ -13,8 +13,8 @@ setup	movlw	0x00
 myArray	res 0x80	; Address in RAM for data
 	goto	start
 	; ******* My data and where to put it in RAM *
-myTable  db	0x7F, 0x93, 0xA6, 0xB9, 0xCA, 0xD9, 0xE6, 0xF0, 0xF8, 0xFC, 0xFE, 0xFC, 0xF8, 0xF0, 0xE6, 0xD9, 0xCA, 0xB9, 0xA6, 0x93, 0x7F, 0x6B, 0x58, 0x45, 0x34, 0x25, 0x18, 0x0E, 0x06, 0x02, 0x00, 0x02, 0x06, 0x0E, 0x18, 0x25, 0x34, 0x45, 0x58, 0x6B
-	constant    counter=0x10   ; Address of counter variable
+myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65
+	constant    counter=0x02   ; Address of counter variable
 main	code
 start	clrf	TRISD	
 	call table_read
@@ -24,21 +24,21 @@ clock_pulse
 	movlw	0x00
 	movwf	PORTE, ACCESS
 	movlw	0xA0
-	movwf	0x19
+	movwf	0x53
 	call	clk_delay
 	movlw	0x01
 	movwf	PORTE, ACCESS
 	return
 	
-delay	decfsz 0x20 ; decrement until zero
+delay	decfsz 0x50 ; decrement until zero
 	bra delay	
 	return
 
-delay2	decfsz 0x21 ; decrement until zero
+delay2	decfsz 0x51 ; decrement until zero
 	bra delay2	
 	return
 
-clk_delay decfsz 0x19 ; decrement until zero
+clk_delay decfsz 0x53 ; decrement until zero
 	bra clk_delay	
 	return
 	
@@ -51,16 +51,16 @@ table_read lfsr	FSR0, myArray	; Load FSR0 with address in RAM
 	movwf	TBLPTRH		; load high byte to TBLPTRH
 	movlw	low(myTable)	; address of data in PM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
-	movlw	.40		;22 bytes to read
+	movlw	.29		;22 bytes to read
 	movwf 	counter		; our counter register
 loop 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0	; move read data from TABLAT to (FSR0), increment FSR0	
 	movff	INDF0, PORTD
 	call	clock_pulse
 	movlw	0xAA
-	movwf	0x20
+	movwf	0x50
 	movlw	0x01
-	movwf	0x21
+	movwf	0x51
 	call	delay
 	decfsz	counter		; count down to zero
 	bra	loop		; keep going until finished
