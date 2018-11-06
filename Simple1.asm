@@ -23,7 +23,7 @@ start	clrf	TRISD
 clock_pulse
 	movlw	0x00
 	movwf	PORTE, ACCESS
-	movlw	0xA0
+	movlw	0x0A
 	movwf	0x53
 	call	clk_delay
 	movlw	0x01
@@ -51,16 +51,15 @@ table_read lfsr	FSR0, myArray	; Load FSR0 with address in RAM
 	movwf	TBLPTRH		; load high byte to TBLPTRH
 	movlw	low(myTable)	; address of data in PM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
-	movlw	.29		;22 bytes to read
+	movlw	.30		;22 bytes to read
 	movwf 	counter		; our counter register
 loop 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, POSTINC0	; move read data from TABLAT to (FSR0), increment FSR0	
-	movff	INDF0, PORTD
+	movff	TABLAT, PORTD	; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse
 	movlw	0xAA
 	movwf	0x50
-	movlw	0x01
-	movwf	0x51
+;	movlw	0x01
+;	movwf	0x51
 	call	delay
 	decfsz	counter		; count down to zero
 	bra	loop		; keep going until finished
