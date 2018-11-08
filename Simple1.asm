@@ -41,10 +41,9 @@ start	clrf	TRISD
 	movlw b'00001011'	    ; Set special event mode
 	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
 	movlw b'00000000'
-	movwf	CCPTMRS1		    ;chooses to use timer1
+	movwf	CCPTMRS1	    ;chooses to use timer1
 	movlw b'00000010'	   
 	movwf	PIE4		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
-	;bsf	PIE1,TMR1IE	    ; Enable timer1 interrupt
 	bsf	INTCON,GIE	    ; Enable all interrupts
 	bsf	INTCON,PEIE
 	goto $			    ; Sit in infinite loop
@@ -66,8 +65,8 @@ clk_delay decfsz 0x53 ; decrement until zero
 	return
 	
 int_hi	code 0x0008		; high vector, no low vector
-	;btfss	INTCON,TMR0IF	; check that this is timer0 interrupt
-	;retfie	FAST		; if not then return
+	btfss	PIE4,CCP4IF	; check that this is timer0 interrupt
+	retfie	FAST		; if not then return
 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, PORTD	; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse
