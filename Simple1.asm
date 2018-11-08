@@ -24,7 +24,7 @@ myArray	res 0x80	; Address in RAM for data
 	goto	start
 	; ******* My data and where to put it in RAM *
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65
-	constant    counter=0x02   ; Address of counter variable
+	constant    counter=0x05   ; Address of counter variable
 	
 
 	
@@ -33,14 +33,15 @@ start	clrf	TRISD
 	clrf	LATD		    ; Clear PORTD outputs
 	movlw b'00110111'	    ; Set timer1 to 16-bit, Fosc/1:8
 	movwf	T1CON		    ; = 16MHz clock rate, approx 1sec rollover
-	bsf	PIR4, CCP4IF	    ; sets interupt enable bit
+	bsf	PIR4, CCP4IE	    ; sets interupt enable bit
 	movlw b'00001011'	    ; Set special event mode
 	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
 	movlw b'00000000'
-	movwf	CCPTMRS1	    ; chooses to use timer1
-	movlw	0xFF
+	banksel CCPTMRS1
+	movwf	CCPTMRS1, BANKED	    ; chooses to use timer1
+	movlw	0x44
 	movwf	CCPR4H
-	movlw	0xFF
+	movlw	0x11
 	movwf	CCPR4L
 	bsf	PIE4, CCP4IE	    ; sets interrupt enable bit
 	bsf	INTCON,GIE	    ; Enable all interrupts
@@ -71,7 +72,8 @@ int_hi	code 0x0008		; high vector, no low vector
 	call	clock_pulse
 	dcfsnz	counter		; count down to zero
 	call	counter_reset
-	bcf	INTCON,TMR0IF	; clear interrupt flag
+	bcf	PIE4,CCP4IF	; clear interrupt flag
+	bsf	PIE4, CCP4IE
 	retfie	FAST		; fast return from interrupt
 	
 counter_reset
