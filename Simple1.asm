@@ -11,10 +11,6 @@ setup	movlw	0x00
 	movwf	TRISE, ACCESS
 	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
-	movlw	0x11
-	movwf	CCPR4H
-	movlw	0x11
-	movwf	CCPR4L
 myArray	res 0x80	; Address in RAM for data
 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
 	movlw	upper(myTable)	; address of data in PM
@@ -36,14 +32,17 @@ main	code
 start	clrf	TRISD	
 	clrf	LATD		    ; Clear PORTD outputs
 	movlw b'00110111'	    ; Set timer1 to 16-bit, Fosc/1:8
-	movwf	T1CON		    ; = 62.5KHz clock rate, approx 1sec rollover
+	movwf	T1CON		    ; = 16MHz clock rate, approx 1sec rollover
 	bsf	PIR4, CCP4IF	    ; sets interupt enable bit
 	movlw b'00001011'	    ; Set special event mode
 	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
 	movlw b'00000000'
-	movwf	CCPTMRS1	    ;chooses to use timer1
-	movlw b'00000010'	   
-	movwf	PIE4		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
+	movwf	CCPTMRS1	    ; chooses to use timer1
+	movlw	0xFF
+	movwf	CCPR4H
+	movlw	0xFF
+	movwf	CCPR4L
+	bsf	PIE4, CCP4IE	    ; sets interrupt enable bit
 	bsf	INTCON,GIE	    ; Enable all interrupts
 	bsf	INTCON,PEIE
 	goto $			    ; Sit in infinite loop
