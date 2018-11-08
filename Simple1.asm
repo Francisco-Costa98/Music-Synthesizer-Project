@@ -65,6 +65,13 @@ int_hi	code 0x0008		; high vector, no low vector
 	retfie	FAST		; fast return from interrupt
 	
 counter_reset
+	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
+	movlw	upper(myTable)	; address of data in PM
+	movwf	TBLPTRU		; load upper bits to TBLPTRU
+	movlw	high(myTable)	; address of data in PM
+	movwf	TBLPTRH		; load high byte to TBLPTRH
+	movlw	low(myTable)	; address of data in PM
+	movwf	TBLPTRL		; load low byte to TBLPTRL
 	movlw	.30		;22 bytes to read
 	movwf 	counter		; our counter register
 	return
