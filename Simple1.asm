@@ -11,6 +11,10 @@ setup	movlw	0x00
 	movwf	TRISE, ACCESS
 	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
+	movlw	0x11
+	movwf	CCPR4H
+	movlw	0x11
+	movwf	CCPR4L
 myArray	res 0x80	; Address in RAM for data
 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
 	movlw	upper(myTable)	; address of data in PM
@@ -31,10 +35,18 @@ myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0x
 main	code
 start	clrf	TRISD	
 	clrf	LATD		    ; Clear PORTD outputs
-	movlw b'10000001'	    ; Set timer0 to 16-bit, Fosc/4/256
-	movwf	T0CON		    ; = 62.5KHz clock rate, approx 1sec rollover
-	bsf	INTCON,TMR0IE	    ; Enable timer0 interrupt
+	movlw b'00110111'	    ; Set timer1 to 16-bit, Fosc/1:8
+	movwf	T1CON		    ; = 62.5KHz clock rate, approx 1sec rollover
+	bsf	PIR4, CCP4IF	    ; sets interupt enable bit
+	movlw b'00001011'	    ; Set special event mode
+	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
+	movlw b'00000000'
+	movwf	CCPTMRS1		    ;chooses to use timer1
+	movlw b'00000010'	   
+	movwf	PIE4		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
+	;bsf	PIE1,TMR1IE	    ; Enable timer1 interrupt
 	bsf	INTCON,GIE	    ; Enable all interrupts
+	bsf	INTCON,PEIE
 	goto $			    ; Sit in infinite loop
 	
 clock_pulse
@@ -54,8 +66,8 @@ clk_delay decfsz 0x53 ; decrement until zero
 	return
 	
 int_hi	code 0x0008		; high vector, no low vector
-	btfss	INTCON,TMR0IF	; check that this is timer0 interrupt
-	retfie	FAST		; if not then return
+	;btfss	INTCON,TMR0IF	; check that this is timer0 interrupt
+	;retfie	FAST		; if not then return
 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, PORTD	; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse
