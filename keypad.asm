@@ -1,5 +1,6 @@
-	#include p18f87k22.inc
-	global setkeypad, keypad_start, khigh, klow
+#include p18f87k22.inc
+	
+	global setup_keypad, keypad_start, khigh, klow
 	
 acs0    udata_acs
 khigh	res 1
@@ -8,12 +9,10 @@ testreg1 res 1
 testreg	res 1
 keypad_delay	res 1
 
-keypad	code
-	
-	goto	setkeypad
+keypad    code
 
-   
-setkeypad	
+
+setup_keypad	
 	banksel PADCFG1 ; PADCFG1 is not in Access Bank!!
 	bsf	PADCFG1, REPU, BANKED ; PortE pull-ups on
 	movlb	0x00 ; set BSR back to Bank 0
@@ -244,4 +243,4 @@ delay3	decfsz 0x22 ; decrement until zero
 	bra phat_delay
 	return
 
-    End
+    end
