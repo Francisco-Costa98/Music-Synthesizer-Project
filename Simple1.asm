@@ -1,5 +1,5 @@
 	#include p18f87k22.inc
-extern setkeypad, keypad_start, khigh, klow
+
 code
 	org 0x0
 	goto	setup
@@ -15,7 +15,6 @@ setup	movlw	0x00
 	movwf	CCPR4H
 	movlw	0xa9
 	movwf	CCPR4L
-;	call	setkeypad
 myArray	res 0x80	; Address in RAM for data
 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
 	movlw	upper(myTable)	; address of data in PM
@@ -36,7 +35,6 @@ myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0x
 main	code
 start	clrf	TRISD	
 	clrf	LATD		    ; Clear PORTD outputs
-;	call	keypad_start
 	movlw b'00110001'	    ; Set timer1 to 16-bit, Fosc/1:8
 	movwf	T1CON		    ; = 16MHz clock rate, approx 1sec rollover
 	banksel CCPTMRS1
