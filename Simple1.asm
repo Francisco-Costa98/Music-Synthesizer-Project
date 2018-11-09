@@ -66,6 +66,9 @@ clk_delay decfsz 0x53 ; decrement until zero
 int_hi	code 0x0008		; high vector, no low vector
 	btfss	PIR4,CCP4IF	; check that this is timer0 interrupt
 	retfie	FAST		; if not then return
+	call	keypad_start
+	movff	khigh, CCPR4H
+	movff	klow, CCPR4L
 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, PORTD	; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse
