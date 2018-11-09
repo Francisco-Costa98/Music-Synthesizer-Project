@@ -1,5 +1,5 @@
 	#include p18f87k22.inc
-
+extern setkeypad, keypad_start, khigh, klow
 code
 	org 0x0
 	goto	setup
@@ -11,6 +11,11 @@ setup	movlw	0x00
 	movwf	TRISE, ACCESS
 	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
+	movlw	0x00		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
+	movwf	CCPR4H
+	movlw	0xa9
+	movwf	CCPR4L
+;	call	setkeypad
 myArray	res 0x80	; Address in RAM for data
 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM	
 	movlw	upper(myTable)	; address of data in PM
@@ -31,18 +36,15 @@ myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0x
 main	code
 start	clrf	TRISD	
 	clrf	LATD		    ; Clear PORTD outputs
+;	call	keypad_start
 	movlw b'00110001'	    ; Set timer1 to 16-bit, Fosc/1:8
 	movwf	T1CON		    ; = 16MHz clock rate, approx 1sec rollover
 	banksel CCPTMRS1
 	bcf	CCPTMRS1, C4TSEL1   ; chooses to use timer1
 	bcf	CCPTMRS1, C4TSEL0   ; chooses to use timer1
 	bsf	PIR4, CCP4IE	    ; sets interupt enable bit
-	movlw b'00001011'	    ; Set special event mode
-	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
-	movlw	0x00
-	movwf	CCPR4H
-	movlw	0xa9
-	movwf	CCPR4L
+	movlw b'00001011'	    ; Set special event mode	   
+	movwf	CCP4CON		    
 	bsf	PIE4, CCP4IE	    ; sets interrupt enable bit
 	bsf	INTCON,PEIE
 	bsf	INTCON,GIE	    ; Enable all interrupts
