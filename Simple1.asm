@@ -8,7 +8,7 @@ code
 
 setup	movlw	0x00
 	movwf	TRISD, ACCESS
-	movwf	TRISE, ACCESS
+	movwf	TRISC, ACCESS
 	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
 	movlw	0x00		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
@@ -50,12 +50,12 @@ start	clrf	TRISD
 	
 clock_pulse
 	movlw	0x00
-	movwf	PORTE, ACCESS
+	movwf	PORTC, ACCESS
 	movlw	0x0A
 	movwf	0x53
 	call	clk_delay
 	movlw	0x01
-	movwf	PORTE, ACCESS
+	movwf	PORTC, ACCESS
 	return
 
 clk_delay decfsz 0x53 ; decrement until zero
