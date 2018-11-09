@@ -1,12 +1,14 @@
 	#include p18f87k22.inc
+	
+	extern  setup_keypad, keypad_start, khigh, klow
 
-code
-	org 0x0
+rst	code	0    ; reset vector
 	goto	setup
 	
-	org 0x100		    ; Main code starts here at address 0x100
-
-setup	movlw	0x00
+main	code
+	
+setup	call	setup_keypad
+	movlw	0x00
 	movwf	TRISD, ACCESS
 	movwf	TRISC, ACCESS
 	bcf	EECON1, CFGS	; point to Flash program memory  
@@ -31,8 +33,6 @@ myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0x
 	constant    counter=0x05   ; Address of counter variable
 	
 
-	
-main	code
 start	clrf	TRISD	
 	clrf	LATD		    ; Clear PORTD outputs
 	movlw b'00110001'	    ; Set timer1 to 16-bit, Fosc/1:8
