@@ -134,18 +134,18 @@ test7	movlw	.65
 test8	movlw	.66
 	cpfseq	testreg
 	bra	test9
-	movlw	0x08
+	movlw	0x00
 	movwf	khigh
-	movlw	0x38
+	movlw	0x97
 	movwf	klow
 	call	Write
 	goto	finish
 test9	movlw	.68
 	cpfseq	testreg
 	bra	testA
-	movlw	0x09
+	movlw	0x00
 	movwf	khigh
-	movlw	0x39
+	movlw	0x85
 	movwf	klow
 	call	Write
 	goto	finish
@@ -206,11 +206,10 @@ testF	movlw	.24
 	
 finish	
 	movff	klow, PORTH
-	goto	keypad_start
 	return
 	
 finish2	
-	bra finish
+	goto finish
 	
 
 	; a delay subroutine if you need one, times around loop in delay_count
