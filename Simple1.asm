@@ -39,9 +39,9 @@ start	clrf	TRISD
 	bsf	PIR4, CCP4IE	    ; sets interupt enable bit
 	movlw b'00001011'	    ; Set special event mode
 	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
-	movlw	0x44
+	movlw	0x00
 	movwf	CCPR4H
-	movlw	0x11
+	movlw	0x69
 	movwf	CCPR4L
 	bsf	PIE4, CCP4IE	    ; sets interrupt enable bit
 	bsf	INTCON,PEIE
