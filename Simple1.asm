@@ -41,7 +41,7 @@ start	clrf	TRISD
 	movwf	CCP4CON		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
 	movlw	0x00
 	movwf	CCPR4H
-	movlw	0x69
+	movlw	0xa9
 	movwf	CCPR4L
 	bsf	PIE4, CCP4IE	    ; sets interrupt enable bit
 	bsf	INTCON,PEIE
@@ -61,8 +61,7 @@ clock_pulse
 clk_delay decfsz 0x53 ; decrement until zero
 	bra clk_delay	
 	return
-	
-	return
+
 	
 int_hi	code 0x0008		; high vector, no low vector
 	btfss	PIR4,CCP4IF	; check that this is timer0 interrupt
