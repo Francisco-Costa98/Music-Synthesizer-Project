@@ -1,8 +1,9 @@
 #include p18f87k22.inc
 	
-	global setup_keypad, keypad_start, khigh, klow
+	global setup_keypad, keypad_start, khigh, klow, test
 	
 acs0    udata_acs
+test	res 1
 khigh	res 1
 klow	res 1
 testreg1 res 1
@@ -25,11 +26,17 @@ setup_keypad
 	movwf	TRISH, ACCESS
 	movlw	0x0A
 	movwf	keypad_delay
+	movlw	0x00		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
+	movwf	khigh
+	movlw	0xa9
+	movwf	klow
 	return
 
 	
 	
 keypad_start	
+	movlw	0x01
+	movwf	test
 	movlw	0x0F
 	movwf	TRISE, ACCESS
 	movlw	0x0A
@@ -205,11 +212,19 @@ testF	movlw	.24
 	goto	finish
 	
 finish	
-	movff	klow, PORTH
+	bsf	PORTC, 1
 	return
 	
 finish2	
-	goto finish
+	movlw	0x00
+	bcf	PORTC, 1
+	movwf	test
+	movwf	PORTH
+	movlw	0x01
+	movwf   khigh
+	movlw	0xFF
+	movwf	klow
+	return
 	
 
 	; a delay subroutine if you need one, times around loop in delay_count
@@ -220,12 +235,8 @@ delay	decfsz	keypad_delay	; decrement until zero
 Write	movlw	0x0A
 	movwf	keypad_delay
 	call	delay
+	movff	klow, PORTH
 	
-	;movlw	0xFF
-	;movwf	0x20, ACCESS
-	;movlw	0x10
-	;movwf	0x22
-	;call	phat_delay
 	return
 	
 phat_delay	decfsz 0x20 ; decrement until zero
