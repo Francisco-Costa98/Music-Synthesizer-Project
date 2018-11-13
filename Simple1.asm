@@ -36,46 +36,48 @@ start	clrf	LATC		    ; clears port c outputs
 	bsf	INTCON,GIE	    ; Enable all interrupts
 	goto $			    ; Sit in infinite loop
 	
-clock_pulse
-	bcf	PORTC, 0
-	movlw	0x0A
-	movwf	0x53
-	call	clk_delay
-	bsf	PORTC, 0
+clock_pulse			    ; clock pulse routine to make DAC read in values
+	bcf	PORTC, 0	    ; clears clock enable bit
+	movlw	0x0A		    ; sets up a delay
+	movwf	0x53		    ; moves delayvalue to register 0x53
+	call	clk_delay	    ; calls delay
+	bsf	PORTC, 0	    ; sets clock enable bit
 	return
 
-clk_delay decfsz 0x53 ; decrement until zero
-	bra clk_delay	
+clk_delay			    ; clock delay routine
+	decfsz 0x53		    ; decrement register 0x53 until zero
+	bra clk_delay		    ; loops until register is zero
 	return
 
 	
-int_hi	code 0x0008		; high vector, no low vector
-	btfss	PIR4,CCP4IF	; check that this is timer1 interrupt
-	retfie	1		; if not then return
-	call	keypad_start
-	movff	khigh, CCPR4H
-	movff	klow, CCPR4L
-	tstfsz	test, 0
-	call	read
-	bcf	PIR4,CCP4IF	; clear interrupt flag
-	retfie	FAST		; fast return from interrupt
+int_hi	code 0x0008		    ; high vector, no low vector
+	btfss	PIR4,CCP4IF	    ; check that this is timer1 interrupt
+	retfie	1		    ; if not then return
+	call	keypad_start	    ; calls keypad start routine
+	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
+	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
+	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
+	call	read		    ; reads values from table
+	bcf	PIR4,CCP4IF	    ; clear interrupt flag
+	retfie	FAST		    ; fast return from interrupt
 	
-counter_reset
-	movlw	upper(myTable)	; address of data in PM
-	movwf	TBLPTRU		; load upper bits to TBLPTRU
-	movlw	high(myTable)	; address of data in PM
-	movwf	TBLPTRH		; load high byte to TBLPTRH
-	movlw	low(myTable)	; address of data in PM
-	movwf	TBLPTRL		; load low byte to TBLPTRL
-	movlw	.30		;22 bytes to read
-	movwf 	counter		; our counter register
+counter_reset			    ; counter reset routine to reset the counter when it goes to zero 
+	movlw	upper(myTable)	    ; address of data in PM
+	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
+	movlw	high(myTable)	    ; address of data in PM
+	movwf	TBLPTRH		    ; load high byte to TBLPTRH
+	movlw	low(myTable)	    ; address of data in PM
+	movwf	TBLPTRL		    ; load low byte to TBLPTRL
+	movlw	.30		    ; 30 bytes to read
+	movwf 	counter		    ; our counter register
 	return
 	
-read	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, PORTD	; move read data from TABLAT to (FSR0), increment FSR0	
-	call	clock_pulse
-	dcfsnz	counter		; count down to zero
-	call	counter_reset
-	return
+read				    ; read routine to read values from table
+	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, PORTD	    ; move read data from TABLAT to (FSR0), increment FSR0	
+	call	clock_pulse	    ; calls clock pulse to read in values
+	dcfsnz	counter		    ; count down to zero
+	call	counter_reset	    ; if counte is zero, the counter is reset
+	return	
 	
 	end
