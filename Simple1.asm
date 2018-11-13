@@ -1,6 +1,6 @@
 	#include p18f87k22.inc
 	
-	extern  setup_keypad, keypad_start, khigh, klow, test
+	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup
 
 acs0    udata_acs		    ; reserves space for variables used
 	counter res 1		    ; reserves one bite for counter 
