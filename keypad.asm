@@ -2,7 +2,7 @@
 	
 	global setup_keypad, keypad_start, khigh, klow, test
 	
-acs0    udata_acs ;reserves space for variables used
+acs0    udata_acs	    ;reserves space for variables used
 test	res 1
 khigh	res 1
 klow	res 1
@@ -10,58 +10,58 @@ testreg1 res 1
 testreg	res 1
 keypad_delay	res 1
 
-keypad    code ;main code
+keypad    code		    ;main code
 
 
-setup_keypad	; routine to set up keypad
-	banksel PADCFG1 ; PADCFG1 is not in Access Bank!!
-	bsf	PADCFG1, RJPU, BANKED ; PortE pull-ups on
-	movlb	0x00 ; set BSR back to Bank 0
-	setf	TRISJ, ACCESS ; Tri-state PortE	
-	clrf	LATJ	;clears latch J
-	clrf	LATH	;clears latch H
-	movlw	0x00	;sets portH to output port
+setup_keypad				; routine to set up keypad
+	banksel PADCFG1			; PADCFG1 is not in Access Bank!!
+	bsf	PADCFG1, RJPU, BANKED	; PortE pull-ups on
+	movlb	0x00			; set BSR back to Bank 0
+	setf	TRISJ, ACCESS		; Tri-state PortE	
+	clrf	LATJ			;clears latch J
+	clrf	LATH			;clears latch H
+	movlw	0x00			;sets portH to output port
 	movwf	TRISH, ACCESS
-	movlw	0x0A	; values moved into delay register
+	movlw	0x0A			; values moved into delay register
 	movwf	keypad_delay
-	movlw	0x00	;initialises value for khigh
+	movlw	0x00			;initialises value for khigh
 	movwf	khigh
-	movlw	0xa9	;initialises value for klow
+	movlw	0xa9			;initialises value for klow
 	movwf	klow
 	return
 
 	
 	
-keypad_start	    ;routine to read keypad
-	movlw	0x01	; initiliases test value to se if keypad is pressed
-	movwf	test	;moves into the test register
-	movlw	0x0F	; lights up one side of portJ (keypad port) for logic operations
+keypad_start			;routine to read keypad
+	movlw	0x01		; initiliases test value to se if keypad is pressed
+	movwf	test		;moves into the test register
+	movlw	0x0F		; lights up one side of portJ (keypad port) for logic operations
 	movwf	TRISJ, ACCESS	; moves value to port j
-	movlw	0x0A	;delay keypad register set up
+	movlw	0x0A		;delay keypad register set up
 	movwf	keypad_delay	;moves value to delay register
-	call	delay	;delays keypad
+	call	delay		;delays keypad
 	movff	PORTJ, testreg1	;moves value presed in port J to test register one
 	movlw	0x00
 	addwf	testreg1, 0, 0	; moves test register value to w register
-	sublw	0x0F	; subtracts value from 0F to see which bit its pressed
-	movwf	testreg1    ;moves value of pressed bit to test register 1
+	sublw	0x0F		; subtracts value from 0F to see which bit its pressed
+	movwf	testreg1	;moves value of pressed bit to test register 1
 	
-	movlw	0xF0	    ; lights up other side of the keypad port (port J)
+	movlw	0xF0		; lights up other side of the keypad port (port J)
 	movwf	TRISJ, ACCESS	;moves value to portj
-	movlw	0x0A	;delay keypad register set up
+	movlw	0x0A		;delay keypad register set up
 	movwf	keypad_delay	;moves value to delay register
-	call	delay	;delays keypad
+	call	delay		;delays keypad
 	movff	PORTJ, testreg	;moves value in port j to test register
 	movlw	0x00
-	addwf	testreg, 0, 0
-	sublw	0xF0
-	movwf	testreg
+	addwf	testreg, 0, 0	; moves test register value to w register
+	sublw	0xF0		; subtracts value from F0 to find which bit is pressed on the left side
+	movwf	testreg		;moves pressed bit into test register
 	movlw	0x00
-	addwf	testreg1, 0, 0
-	addwf	testreg, 1, 0
-	movlw	0x0A
-	movwf	keypad_delay
-	call	delay
+	addwf	testreg1, 0, 0	; movest pressed bit on the right hand side to w register
+	addwf	testreg, 1, 0	;adds both left pressed bit and right pressed bit togehter
+	movlw	0x0A		;delay keypad register set up
+	movwf	keypad_delay	;moves value to delay register
+	call	delay		;delays keypad
 	
 	
 test0	movlw	.130
