@@ -215,31 +215,33 @@ testF	movlw	.24
 	call	Write
 	goto	finish
 	
-finish	
-	bsf	PORTC, 1
-	return
+finish			    ; finish routine 
+	bsf	PORTC, 1    ; lights up a bit in port c to show us a value has been passed through
+	return		    ; returns to main code
 	
-finish2	
-	movlw	0x00
-	bcf	PORTC, 1
-	movwf	test
-	movwf	PORTH
-	movlw	0x01
-	movwf   khigh
-	movlw	0xFF
-	movwf	klow
-	return
+finish2			    ; finish two routine
+	bcf	PORTC, 1    ; clears a bit in port C to let us know no value is being read
+	movlw	0x00	    ; moves zero into the w register
+	movwf	test	    ; moves value of zero into test value for use in main routine
+	movwf	PORTH	    ; turns off portH to show us no values are being read
+	movlw	0x01	    ; sets values of khigh
+	movwf   khigh	    ; gives khigh a high value to give our clock time to run the rest of the commands
+	movlw	0xFF	    ; sets value of klow
+	movwf	klow	    ; sets high value of klow to give our clock time to run the rest of the commands
+	return		    ; returns to main code
 	
 
-	; a delay subroutine if you need one, times around loop in delay_count
-delay	decfsz	keypad_delay	; decrement until zero
-	bra delay
+	
+delay				; a delay subroutine 
+	decfsz	keypad_delay	; decrement register until zero
+	bra delay		; loops until delay register is zero
 	return
 	
-Write	movlw	0x0A
-	movwf	keypad_delay
-	call	delay
-	movff	klow, PORTH
+Write				; a routine to write our klow values to port h 
+	movlw	0x0A		; sets up keypad_delay register
+	movwf	keypad_delay	; moves value into register
+	call	delay		; calls delay
+	movff	klow, PORTH	; moves klow value to port h
 	return
 
 
