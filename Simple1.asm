@@ -2,34 +2,30 @@
 	
 	extern  setup_keypad, keypad_start, khigh, klow, test
 
-acs0    udata_acs
+acs0    udata_acs	; reserves space for variables used
 	counter res 1
  
-rst	code	0    ; reset vector
-	goto	setup
+rst	code	0	; reset vector
+	goto	setup	; goes to code setup
 	
 main	code
 	
-setup	call	setup_keypad
-	movlw	0x00
-	movwf	TRISD, ACCESS
-	movwf	TRISC, ACCESS
+setup	call	setup_keypad	; sets up keypad
+	movlw	0x00		; moves value of 0 to w register
+	movwf	TRISD, ACCESS	; sets port d to output
+	movwf	TRISC, ACCESS	; sets port c to output
 	bcf	EECON1, CFGS	; point to Flash program memory  
 	bsf	EECON1, EEPGD 	; access Flash program memory
-	movlw	0x00		    ; initialises ccp4 module with timer1 for compare and timer2 for pwm
-	movwf	CCPR4H
-	movlw	0xa9
-	movwf	CCPR4L
-	call	counter_reset
-	goto	start
-	; ******* My data and where to put it in RAM *
+	call	counter_reset	; sets up table and counter for reading data
+	goto	start		; goes to start of code
+	; ******* My data **
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65	
 
-start	clrf	TRISD	
+start	clrf	LATC		    ; clears port c outputs	
 	clrf	LATD		    ; Clear PORTD outputs
 	movlw b'00110001'	    ; Set timer1 to 16-bit, Fosc/1:8
 	movwf	T1CON		    ; = 16MHz clock rate, approx 1sec rollover
-	banksel CCPTMRS1
+	banksel CCPTMRS1	    ; CCPTMRS1 is in banked ram
 	bcf	CCPTMRS1, C4TSEL1   ; chooses to use timer1
 	bcf	CCPTMRS1, C4TSEL0   ; chooses to use timer1
 	bsf	PIR4, CCP4IE	    ; sets interupt enable bit
