@@ -1,5 +1,5 @@
 #include p18f87k22.inc
-	
+	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R
 	global setup_keypad, keypad_start, khigh, klow, test
 	
 acs0    udata_acs	    ;reserves space for variables used
@@ -9,6 +9,7 @@ klow	res 1
 testreg1 res 1
 testreg	res 1
 keypad_delay	res 1
+ascii_note  res 1
 
 keypad    code		    ;main code
 
@@ -33,6 +34,9 @@ setup_keypad				; routine to set up keypad
 	
 	
 keypad_start			;routine to read keypad
+	call	LCD_Clear	;clears LCD
+	movlw	0x5f
+	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
 	movlw	0x01		; initiliases test value to se if keypad is pressed
 	movwf	test		;moves into the test register
 	movlw	0x0F		; lights up one side of portJ (keypad port) for logic operations
@@ -86,6 +90,8 @@ test1	movlw	.17
 	movwf	khigh
 	movlw	0x2E
 	movwf	klow
+	movlw	0x41
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test2	movlw	.18
@@ -95,6 +101,8 @@ test2	movlw	.18
 	movwf	khigh
 	movlw	0x0D
 	movwf	klow
+	movlw	0x42
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test3	movlw	.20
@@ -104,6 +112,8 @@ test3	movlw	.20
 	movwf	khigh
 	movlw	0xFE
 	movwf	klow
+	movlw	0x43
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test4	movlw	.33
@@ -113,6 +123,8 @@ test4	movlw	.33
 	movwf	khigh
 	movlw	0xE2
 	movwf	klow
+	movlw	0x44
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test5	movlw	.34
@@ -122,6 +134,8 @@ test5	movlw	.34
 	movwf	khigh
 	movlw	0xC9
 	movwf	klow
+	movlw	0x45
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test6	movlw	.36
@@ -131,6 +145,8 @@ test6	movlw	.36
 	movwf	khigh
 	movlw	0xBE
 	movwf	klow	
+	movlw	0x46
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test7	movlw	.65
@@ -140,6 +156,8 @@ test7	movlw	.65
 	movwf	khigh
 	movlw	0xA9
 	movwf	klow
+	movlw	0x47
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test8	movlw	.66
@@ -149,6 +167,8 @@ test8	movlw	.66
 	movwf	khigh
 	movlw	0x97
 	movwf	klow
+	movlw	0x48
+	movwf	ascii_note
 	call	Write
 	goto	finish
 test9	movlw	.68
@@ -158,6 +178,8 @@ test9	movlw	.68
 	movwf	khigh
 	movlw	0x85
 	movwf	klow
+	movlw	0x49
+	movwf	ascii_note
 	call	Write
 	goto	finish
 testA	movlw	.129
@@ -185,7 +207,7 @@ testC	movlw	.136
 	movwf	khigh
 	movlw	0x21
 	movwf	klow
-	call	Write
+	call	Write_Song
 	goto	finish
 testD	movlw	.72
 	cpfseq	testreg
@@ -238,11 +260,27 @@ delay				; a delay subroutine
 	return
 	
 Write				; a routine to write our klow values to port h 
+	movf	ascii_note
+	call	LCD_Send_Byte_D
 	movlw	0x0A		; sets up keypad_delay register
 	movwf	keypad_delay	; moves value into register
 	call	delay		; calls delay
 	movff	klow, PORTH	; moves klow value to port h
 	return
 
-
+Write_Song
+	movlw	0x53
+	call LCD_Send_Byte_D
+	call LCD_Cursor_R
+	movlw	0x6f
+	call LCD_Send_Byte_D
+	call LCD_Cursor_R
+	movlw	0x6e
+	call LCD_Send_Byte_D
+	call LCD_Cursor_R
+	movlw	0x67
+	call LCD_Send_Byte_D
+	call LCD_Cursor_R
+	return
+	
     end
