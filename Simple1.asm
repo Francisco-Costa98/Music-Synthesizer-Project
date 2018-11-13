@@ -2,22 +2,22 @@
 	
 	extern  setup_keypad, keypad_start, khigh, klow, test
 
-acs0    udata_acs	; reserves space for variables used
-	counter res 1
+acs0    udata_acs		    ; reserves space for variables used
+	counter res 1		    ; reserves one bite for counter 
  
-rst	code	0	; reset vector
-	goto	setup	; goes to code setup
+rst	code	0		    ; reset vector
+	goto	setup		    ; goes to code setup
 	
 main	code
 	
-setup	call	setup_keypad	; sets up keypad
-	movlw	0x00		; moves value of 0 to w register
-	movwf	TRISD, ACCESS	; sets port d to output
-	movwf	TRISC, ACCESS	; sets port c to output
-	bcf	EECON1, CFGS	; point to Flash program memory  
-	bsf	EECON1, EEPGD 	; access Flash program memory
-	call	counter_reset	; sets up table and counter for reading data
-	goto	start		; goes to start of code
+setup	call	setup_keypad	    ; sets up keypad
+	movlw	0x00		    ; moves value of 0 to w register
+	movwf	TRISD, ACCESS	    ; sets port d to output
+	movwf	TRISC, ACCESS	    ; sets port c to output
+	bcf	EECON1, CFGS	    ; point to Flash program memory  
+	bsf	EECON1, EEPGD	    ; access Flash program memory
+	call	counter_reset	    ; sets up table and counter for reading data
+	goto	start		    ; goes to start of code
 	; ******* My data **
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65	
 
