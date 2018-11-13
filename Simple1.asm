@@ -11,6 +11,7 @@ rst	code	0		    ; reset vector
 main	code
 	
 setup	call	setup_keypad	    ; sets up keypad
+	call	LCD_Setup	    ; sets up LCD
 	movlw	0x00		    ; moves value of 0 to w register
 	movwf	TRISD, ACCESS	    ; sets port d to output
 	movwf	TRISC, ACCESS	    ; sets port c to output
