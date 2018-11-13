@@ -62,15 +62,21 @@ keypad_start			;routine to read keypad
 	movlw	0x0A		;delay keypad register set up
 	movwf	keypad_delay	;moves value to delay register
 	call	delay		;delays keypad
-	
+	; we now have the combined value of the pressed bits in the test register
+	; this number is unique for each pressed number
+	; in the next sequence of tests we compare this number with the known possible values for what we 
+	; know this number could be, if there is a match we branch to the finish routine, if there are
+	; no matchess we branch to the finish 2 routine
+	; if there is a match we move the required khigh and klow values to what frequency we
+	; want that number to correspond to 
 	
 test0	movlw	.130
 	cpfseq	testreg
 	bra	test1
 	movlw	0x00
-	movwf	0x03, ACCESS
+	movwf	khigh
 	movlw	0x30 
-	movwf	0x04
+	movwf	klow
 	call	Write
 	goto	finish
 test1	movlw	.17
