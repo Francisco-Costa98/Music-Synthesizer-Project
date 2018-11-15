@@ -47,7 +47,7 @@ start	clrf	LATC		    ; clears port c outputs
 clock_pulse			    ; clock pulse routine to make DAC read in values
 	bcf	PORTC, 0	    ; clears clock enable bit
 	movlw	0x0A		    ; sets up a delay
-	movwf	delayreg		    ; moves delayvalue to register 0x53
+	movwf	delayreg	    ; moves delayvalue to register 0x53
 	call	clk_delay	    ; calls delay
 	bsf	PORTC, 0	    ; sets clock enable bit
 	return
