@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
-	global setup_keypad, keypad_start, khigh, klow, test, c_test, chord_test
+	global setup_keypad, keypad_start, khigh, klow, test, a_test, chord_test
 	
 acs0    udata_acs	    ;reserves space for variables used
 test	res 1
@@ -10,7 +10,7 @@ testreg1 res 1
 testreg	res 1
 keypad_delay	res 1
 ascii_note  res 1
-c_test	res 1
+a_test	res 1
 chord_test	res 1
 
 keypad    code		    ;main code
@@ -195,7 +195,7 @@ testA	movlw	.129
 	movlw	0x63 
 	movwf	klow
 	movlw	0x01
-	movwf	c_test
+	movwf	a_test
 	call	Write_Song
 	goto	finish
 testB	movlw	.132
