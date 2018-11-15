@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 
-    global  LCD_Setup, LCD_Write_Message, LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R
+    global  LCD_Setup, LCD_Write_Message, LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
 
 acs0    udata_acs   ; named variables in access ram
 LCD_cnt_l   res 1   ; reserve 1 byte for variable LCD_cnt_l
@@ -145,6 +145,12 @@ LCD_Cursor_R
 	movlw	b'00010100'
 	call	LCD_Send_Byte_I	
 	call	LCD_delay
+	return
+	
+LCD_Cursor_L
+	movlw	b'00010000'
+	call	LCD_Send_Byte_I	
+	;call	LCD_delay
 	return
 	
     end
