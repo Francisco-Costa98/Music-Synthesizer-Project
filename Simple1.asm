@@ -58,6 +58,8 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	call	keypad_start	    ; calls keypad start routine
 	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
 	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
+	tstfsz	c_test, 0	    ; checks if c is pressed on the keypad, if nothing is pressed no values are read
+	call	play_song
 	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
 	call	read		    ; reads values from table
 	bcf	PIR4,CCP4IF	    ; clear interrupt flag
