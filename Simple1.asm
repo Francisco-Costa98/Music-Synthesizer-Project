@@ -4,6 +4,7 @@
 
 acs0    udata_acs		    ; reserves space for variables used
 	counter res 1		    ; reserves one bite for counter 
+	delayreg res 1		    ; reserve one byte for delay register
  
 rst	code	0		    ; reset vector
 	goto	setup		    ; goes to code setup
@@ -40,20 +41,20 @@ start	clrf	LATC		    ; clears port c outputs
 clock_pulse			    ; clock pulse routine to make DAC read in values
 	bcf	PORTC, 0	    ; clears clock enable bit
 	movlw	0x0A		    ; sets up a delay
-	movwf	0x53		    ; moves delayvalue to register 0x53
+	movwf	delayreg		    ; moves delayvalue to register 0x53
 	call	clk_delay	    ; calls delay
 	bsf	PORTC, 0	    ; sets clock enable bit
 	return
 
 clk_delay			    ; clock delay routine
-	decfsz 0x53		    ; decrement register 0x53 until zero
+	decfsz delayreg		    ; decrement register 0x53 until zero
 	bra clk_delay		    ; loops until register is zero
 	return
 
 	
 int_hi	code 0x0008		    ; high vector, no low vector
 	btfss	PIR4,CCP4IF	    ; check that this is timer1 interrupt
-	retfie	1		    ; if not then return
+	retfie	FAST		    ; if not then return
 	call	keypad_start	    ; calls keypad start routine
 	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
 	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
