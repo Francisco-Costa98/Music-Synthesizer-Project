@@ -2,16 +2,16 @@
 	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
 	global setup_keypad, keypad_start, khigh, klow, test, a_test, chord_test
 	
-acs0    udata_acs	    ;reserves space for variables used
-test	res 1
-khigh	res 1
-klow	res 1
-testreg1 res 1
-testreg	res 1
-keypad_delay	res 1
-ascii_note  res 1
-a_test	res 1
-chord_test	res 1
+acs0    udata_acs	    ; reserves space for variables used
+test	res 1		    ; reserves space for test if zero
+khigh	res 1		    ; reserves space for frequencies
+klow	res 1		    ; reserves space for frequencies
+testreg1 res 1		    ; reserves space for test
+testreg	res 1		    ; reserves space for test
+keypad_delay	res 1	    ; reserves space for delay
+ascii_note  res 1	    ; reserves space for storing ascii character
+a_test	res 1		    ; reserves space for a button test
+chord_test	res 1	    ; reserves space for chord test
 
 keypad    code		    ;main code
 
@@ -284,15 +284,15 @@ delay				; a delay subroutine
 	
 Write				; a routine to write our klow values to port h 
 	movf	ascii_note
-	call	LCD_Send_Byte_D
-	call	LCD_Cursor_L
+	call	LCD_Send_Byte_D ; sends ascii to lcd
+	call	LCD_Cursor_R	; moves cursor right
 	movlw	0x0A		; sets up keypad_delay register
 	movwf	keypad_delay	; moves value into register
 	call	delay		; calls delay
 	movff	klow, PORTH	; moves klow value to port h
 	return
 
-Write_Song
+Write_Song			; subroutine writes the word song when right key is pressed
 	movlw	0x53
 	call LCD_Send_Byte_D
 	movlw	0x6f
