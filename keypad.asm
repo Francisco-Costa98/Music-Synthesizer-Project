@@ -1,6 +1,6 @@
 #include p18f87k22.inc
-	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R
-	global setup_keypad, keypad_start, khigh, klow, test
+	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
+	global setup_keypad, keypad_start, khigh, klow, test, c_test
 	
 acs0    udata_acs	    ;reserves space for variables used
 test	res 1
@@ -10,7 +10,7 @@ testreg1 res 1
 testreg	res 1
 keypad_delay	res 1
 ascii_note  res 1
-  c_test	res 1
+c_test	res 1
 
 keypad    code		    ;main code
 
@@ -38,8 +38,9 @@ keypad_start			;routine to read keypad
 	;call	LCD_Clear	;clears LCD
 	movlw	0x5f
 	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
-	movlw	0x01		; initiliases test value to se if keypad is pressed
+	movlw	0x00		; initiliases test value to se if keypad is pressed
 	movwf	c_test		; tests if c is pressed
+	movlw	0x01
 	movwf	test		;moves into the test register
 	movlw	0x0F		; lights up one side of portJ (keypad port) for logic operations
 	movwf	TRISJ, ACCESS	; moves value to port j
@@ -196,9 +197,9 @@ testA	movlw	.129
 testB	movlw	.132
 	cpfseq	testreg
 	bra	testC
-	movlw	0x00
+	movlw	0x01
 	movwf	khigh
-	movlw	0x42
+	movlw	0x8f
 	movwf	klow
 	call	Write
 	goto	finish
@@ -209,34 +210,34 @@ testC	movlw	.136
 	movwf	khigh
 	movlw	0x21
 	movwf	klow
-	movlw	0x00
+	movlw	0x01
 	movwf	c_test
 	call	Write_Song
 	goto	finish
 testD	movlw	.72
 	cpfseq	testreg
 	bra	testE
-	movlw	0x0
+	movlw	0x01
 	movwf	khigh
-	movlw	0x10
+	movlw	0xa7
 	movwf	klow
 	call	Write
 	goto	finish
 testE	movlw	.40
 	cpfseq	testreg
 	bra	testF
-	movlw	0x00
+	movlw	0x01
 	movwf	khigh
-	movlw	0x0A
+	movlw	0xda
 	movwf	klow
 	call	Write
 	goto	finish
 testF	movlw	.24
 	cpfseq	testreg
 	bra	finish2
-	movlw	0x00
+	movlw	0x02
 	movwf	khigh
-	movlw	0x01
+	movlw	0x34
 	movwf	klow
 	call	Write
 	goto	finish
@@ -266,6 +267,7 @@ delay				; a delay subroutine
 Write				; a routine to write our klow values to port h 
 	movf	ascii_note
 	call	LCD_Send_Byte_D
+	call	LCD_Cursor_L
 	movlw	0x0A		; sets up keypad_delay register
 	movwf	keypad_delay	; moves value into register
 	call	delay		; calls delay
@@ -284,7 +286,7 @@ Write_Song
 	;call LCD_Cursor_R
 	movlw	0x67
 	call LCD_Send_Byte_D
-	;call LCD_Cursor_R
+	
 	return
 	
     end
