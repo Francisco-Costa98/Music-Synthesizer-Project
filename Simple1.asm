@@ -1,10 +1,14 @@
 	#include p18f87k22.inc
 	
-	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup
+	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, c_test
 
 acs0    udata_acs		    ; reserves space for variables used
 	counter res 1		    ; reserves one bite for counter 
 	delayreg res 1		    ; reserve one byte for delay register
+	thic1 res 1
+	thic2 res 1
+	thic3 res 1
+	song_counter res 1
  
 rst	code	0		    ; reset vector
 	goto	setup		    ; goes to code setup
@@ -22,7 +26,9 @@ setup	call	setup_keypad	    ; sets up keypad
 	goto	start		    ; goes to start of code
 	; ******* My data **
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65	
-
+songTable db	0x68, 0x41, 0x99, 0xFF, 0xDE, 0x67
+chordTable db	0xfc, 0xba, 0x7b, 0x41, 0x1d, 0x18, 0x2f, 0x58, 0x82, 0xa0, 0xaa, 0xa3, 0x92, 0x82, 0x7e, 0x87, 0x98, 0xa6, 0xa8, 0x96, 0x73, 0x47, 0x24, 0x17, 0x28, 0x56, 0x94, 0xcf, 0xf5
+ 
 start	clrf	LATC		    ; clears port c outputs	
 	clrf	LATD		    ; Clear PORTD outputs
 	movlw b'00110001'	    ; Set timer1 to 16-bit, Fosc/1:8
@@ -66,22 +72,68 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	retfie	FAST		    ; fast return from interrupt
 	
 counter_reset			    ; counter reset routine to reset the counter when it goes to zero 
-	movlw	upper(myTable)	    ; address of data in PM
+	movlw	upper(chordTable)	    ; address of data in PM
 	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
-	movlw	high(myTable)	    ; address of data in PM
+	movlw	high(chordTable)	    ; address of data in PM
 	movwf	TBLPTRH		    ; load high byte to TBLPTRH
-	movlw	low(myTable)	    ; address of data in PM
+	movlw	low(chordTable)	    ; address of data in PM
 	movwf	TBLPTRL		    ; load low byte to TBLPTRL
-	movlw	.30		    ; 30 bytes to read
+	movlw	.29		    ; 30 bytes to read
 	movwf 	counter		    ; our counter register
 	return
 	
-read				    ; read routine to read values from table
+read				    ; read routine to  read values from table
 	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, PORTD	    ; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse	    ; calls clock pulse to read in values
 	dcfsnz	counter		    ; count down to zero
 	call	counter_reset	    ; if counte is zero, the counter is reset
 	return	
+	
+play_song
+	call song_setup
+	call read_song
+	movlw 0x10
+	movwf thic1
+	movwf thic2
+	movwf thic3
+	call thicc_delay
+	call counter_reset
+	return
+	
+	
+song_setup
+	movlw	upper(songTable)	    ; address of data in PM
+	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
+	movlw	high(songTable)	    ; address of data in PM
+	movwf	TBLPTRH		    ; load high byte to TBLPTRH
+	movlw	low(songTable)	    ; address of data in PM
+	movwf	TBLPTRL		    ; load low byte to TBLPTRL
+	movlw	.6		    ; 30 bytes to read
+	movwf 	counter		    ; our counter register
+	return
+
+read_song			    ; read routine to read values from table
+	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, CCPR4L	    ; move read data from TABLAT to (FSR0), increment FSR0	
+	call	clock_pulse	    ; calls clock pulse to read in values
+	dcfsnz	song_counter		    ; count down to zero
+	call	song_setup	    ; if counte is zero, the counter is reset
+	return	
+	
+thicc_delay	decfsz thic1 ; decrement until zero
+	bra thicc_delay
+	call delay2	
+	return
+	
+delay2	decfsz thic2 ; decrement until zero	
+	bra delay2
+	call delay3
+	return
+		
+delay3	decfsz thic3 ; decrement until zero	
+	bra delay3
+	return
+	
 	
 	end
