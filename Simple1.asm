@@ -67,7 +67,7 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	tstfsz	c_test, 0	    ; checks if c is pressed on the keypad, if nothing is pressed no values are read
 	call	play_song
 	tstfsz	chord_test, 0	    ; checks if chord key is pressed on the keypad, if nothing is pressed no values are read
-	call	chord_setup
+	call	read_chord
 	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
 	call	read		    ; reads values from table
 	bcf	PIR4,CCP4IF	    ; clear interrupt flag
@@ -146,9 +146,14 @@ chord_setup			    ; counter reset routine to reset the counter when it goes to z
 	movwf	TBLPTRL		    ; load low byte to TBLPTRL
 	movlw	.29		    ; 30 bytes to read
 	movwf 	counter		    ; our counter register
-	call	read
-	bcf	PIR4,CCP4IF	    ; clear interrupt flag
-	retfie FAST
+	return
 	
+read_chord
+	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, PORTD	    ; move read data from TABLAT to (FSR0), increment FSR0	
+	call	clock_pulse	    ; calls clock pulse to read in values
+	dcfsnz	counter		    ; count down to zero
+	call	chord_setup	    ; if counte is zero, the counter is reset
+	return
 	
 	end
