@@ -34,7 +34,7 @@ setup_keypad				; routine to set up keypad
 	
 	
 keypad_start			;routine to read keypad
-	call	LCD_Clear	;clears LCD
+	;call	LCD_Clear	;clears LCD
 	movlw	0x5f
 	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
 	movlw	0x01		; initiliases test value to se if keypad is pressed
@@ -271,16 +271,16 @@ Write				; a routine to write our klow values to port h
 Write_Song
 	movlw	0x53
 	call LCD_Send_Byte_D
-	call LCD_Cursor_R
+	;call LCD_Cursor_R
 	movlw	0x6f
 	call LCD_Send_Byte_D
-	call LCD_Cursor_R
+	;call LCD_Cursor_R
 	movlw	0x6e
 	call LCD_Send_Byte_D
-	call LCD_Cursor_R
+	;call LCD_Cursor_R
 	movlw	0x67
 	call LCD_Send_Byte_D
-	call LCD_Cursor_R
+	;call LCD_Cursor_R
 	return
 	
     end
