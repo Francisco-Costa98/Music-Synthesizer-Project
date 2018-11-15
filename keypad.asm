@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
-	global setup_keypad, keypad_start, khigh, klow, test, c_test
+	global setup_keypad, keypad_start, khigh, klow, test, c_test, chord_test
 	
 acs0    udata_acs	    ;reserves space for variables used
 test	res 1
@@ -11,6 +11,7 @@ testreg	res 1
 keypad_delay	res 1
 ascii_note  res 1
 c_test	res 1
+chord_test	res 1
 
 keypad    code		    ;main code
 
@@ -40,6 +41,7 @@ keypad_start			;routine to read keypad
 	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
 	movlw	0x00		; initiliases test value to se if keypad is pressed
 	movwf	c_test		; tests if c is pressed
+	movwf	chord_test	; tests if chord is pressed
 	movlw	0x01
 	movwf	test		;moves into the test register
 	movlw	0x0F		; lights up one side of portJ (keypad port) for logic operations
@@ -201,6 +203,10 @@ testB	movlw	.132
 	movwf	khigh
 	movlw	0x8f
 	movwf	klow
+	movlw	0x01
+	movwf	chord_test
+	movlw	0x00
+	movwf	test
 	call	Write
 	goto	finish
 testC	movlw	.136
@@ -221,6 +227,10 @@ testD	movlw	.72
 	movwf	khigh
 	movlw	0xa7
 	movwf	klow
+	movlw	0x01
+	movwf	chord_test
+	movlw	0x00
+	movwf	test
 	call	Write
 	goto	finish
 testE	movlw	.40
@@ -230,6 +240,10 @@ testE	movlw	.40
 	movwf	khigh
 	movlw	0xda
 	movwf	klow
+	movlw	0x01
+	movwf	chord_test
+	movlw	0x00
+	movwf	test
 	call	Write
 	goto	finish
 testF	movlw	.24
@@ -239,6 +253,10 @@ testF	movlw	.24
 	movwf	khigh
 	movlw	0x34
 	movwf	klow
+	movlw	0x01
+	movwf	chord_test
+	movlw	0x00
+	movwf	test
 	call	Write
 	goto	finish
 	
