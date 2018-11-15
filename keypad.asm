@@ -194,7 +194,9 @@ testA	movlw	.129
 	movwf	khigh
 	movlw	0x63 
 	movwf	klow
-	call	Write
+	movlw	0x01
+	movwf	c_test
+	call	Write_Song
 	goto	finish
 testB	movlw	.132
 	cpfseq	testreg
@@ -203,10 +205,6 @@ testB	movlw	.132
 	movwf	khigh
 	movlw	0x8f
 	movwf	klow
-	movlw	0x01
-	movwf	chord_test
-	movlw	0x00
-	movwf	test
 	call	Write
 	goto	finish
 testC	movlw	.136
@@ -217,8 +215,10 @@ testC	movlw	.136
 	movlw	0x21
 	movwf	klow
 	movlw	0x01
-	movwf	c_test
-	call	Write_Song
+	movwf	chord_test
+	movlw	0x00
+	movwf	test
+	call	Write
 	goto	finish
 testD	movlw	.72
 	cpfseq	testreg
@@ -295,13 +295,10 @@ Write				; a routine to write our klow values to port h
 Write_Song
 	movlw	0x53
 	call LCD_Send_Byte_D
-	;call LCD_Cursor_R
 	movlw	0x6f
 	call LCD_Send_Byte_D
-	;call LCD_Cursor_R
 	movlw	0x6e
 	call LCD_Send_Byte_D
-	;call LCD_Cursor_R
 	movlw	0x67
 	call LCD_Send_Byte_D
 	
