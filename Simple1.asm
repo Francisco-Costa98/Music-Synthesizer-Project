@@ -1,14 +1,14 @@
 	#include p18f87k22.inc
 	
-	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, c_test, chord_test
+	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, a_test, chord_test
 
 acs0    udata_acs		    ; reserves space for variables used
 	counter res 1		    ; reserves one bite for counter 
 	delayreg res 1		    ; reserve one byte for delay register
-	thic1 res 1
-	thic2 res 1
-	thic3 res 1
-	song_counter res 1
+	thic1 res 1		    ; reserves byte for cascading delay register
+	thic2 res 1		    ; reserves byte for cascading delay register
+	thic3 res 1		    ; reserves byte for cascading delay register
+	song_counter res 1	    ; reserves byte for song counter
  
 rst	code	0		    ; reset vector
 	goto	setup		    ; goes to code setup
@@ -64,10 +64,10 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	call	keypad_start	    ; calls keypad start routine
 	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
 	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
-	tstfsz	c_test, 0	    ; checks if c is pressed on the keypad, if nothing is pressed no values are read
-	call	play_song
+	tstfsz	a_test, 0	    ; checks if c is pressed on the keypad, if nothing is pressed no values are read
+	call	play_song	    ; calls song sub-routine if c is pressed
 	tstfsz	chord_test, 0	    ; checks if chord key is pressed on the keypad, if nothing is pressed no values are read
-	call	read_chord
+	call	read_chord	    ; plays chord if certain buttons are pressed
 	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
 	call	read		    ; reads values from table
 	bcf	PIR4,CCP4IF	    ; clear interrupt flag
@@ -105,7 +105,7 @@ play_song
 	
 	
 song_setup
-	movlw	upper(songTable)	    ; address of data in PM
+	movlw	upper(songTable)    ; address of data in PM
 	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
 	movlw	high(songTable)	    ; address of data in PM
 	movwf	TBLPTRH		    ; load high byte to TBLPTRH
@@ -119,7 +119,7 @@ read_song			    ; read routine to read values from table
 	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, CCPR4L	    ; move read data from TABLAT to (FSR0), increment FSR0	
 	call	clock_pulse	    ; calls clock pulse to read in values
-	dcfsnz	song_counter		    ; count down to zero
+	dcfsnz	song_counter	    ; count down to zero
 	call	song_setup	    ; if counte is zero, the counter is reset
 	return	
 	
