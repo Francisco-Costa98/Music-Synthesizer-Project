@@ -1,6 +1,6 @@
 	#include p18f87k22.inc
 	
-	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, c_test
+	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, c_test, chord_test
 
 acs0    udata_acs		    ; reserves space for variables used
 	counter res 1		    ; reserves one bite for counter 
@@ -66,19 +66,21 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
 	tstfsz	c_test, 0	    ; checks if c is pressed on the keypad, if nothing is pressed no values are read
 	call	play_song
+	tstfsz	chord_test, 0	    ; checks if chord key is pressed on the keypad, if nothing is pressed no values are read
+	call	chord_setup
 	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
 	call	read		    ; reads values from table
 	bcf	PIR4,CCP4IF	    ; clear interrupt flag
 	retfie	FAST		    ; fast return from interrupt
 	
 counter_reset			    ; counter reset routine to reset the counter when it goes to zero 
-	movlw	upper(chordTable)	    ; address of data in PM
+	movlw	upper(myTable)	    ; address of data in PM
 	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
-	movlw	high(chordTable)	    ; address of data in PM
+	movlw	high(myTable)	    ; address of data in PM
 	movwf	TBLPTRH		    ; load high byte to TBLPTRH
-	movlw	low(chordTable)	    ; address of data in PM
+	movlw	low(myTable)	    ; address of data in PM
 	movwf	TBLPTRL		    ; load low byte to TBLPTRL
-	movlw	.29		    ; 30 bytes to read
+	movlw	.30		    ; 30 bytes to read
 	movwf 	counter		    ; our counter register
 	return
 	
@@ -134,6 +136,19 @@ delay2	decfsz thic2 ; decrement until zero
 delay3	decfsz thic3 ; decrement until zero	
 	bra delay3
 	return
+	
+chord_setup			    ; counter reset routine to reset the counter when it goes to zero 
+	movlw	upper(chordTable)	    ; address of data in PM
+	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
+	movlw	high(chordTable)	    ; address of data in PM
+	movwf	TBLPTRH		    ; load high byte to TBLPTRH
+	movlw	low(chordTable)	    ; address of data in PM
+	movwf	TBLPTRL		    ; load low byte to TBLPTRL
+	movlw	.29		    ; 30 bytes to read
+	movwf 	counter		    ; our counter register
+	call	read
+	bcf	PIR4,CCP4IF	    ; clear interrupt flag
+	retfie FAST
 	
 	
 	end
