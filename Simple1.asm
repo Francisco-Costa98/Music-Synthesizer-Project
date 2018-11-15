@@ -92,15 +92,15 @@ read				    ; read routine to  read values from table
 	call	counter_reset	    ; if counte is zero, the counter is reset
 	return	
 	
-play_song
-	call song_setup
-	call read_song
-	movlw 0x10
-	movwf thic1
-	movwf thic2
-	movwf thic3
-	call thicc_delay
-	call counter_reset
+play_song			    ; subroutine to play song
+	call song_setup		    ; sets up song
+	call read_song		    ; reads note from song
+	movlw 0x10		    ; moves value to delay register
+	movwf thic1		    ; initialises delay register
+	movwf thic2		    ; initialises delay register
+	movwf thic3		    ; initialises delay register
+	call thicc_delay	    ; calls delay
+	call counter_reset	    ; resets counter
 	return
 	
 	
@@ -123,24 +123,25 @@ read_song			    ; read routine to read values from table
 	call	song_setup	    ; if counte is zero, the counter is reset
 	return	
 	
-thicc_delay	decfsz thic1 ; decrement until zero
-	bra thicc_delay
-	call delay2	
+thicc_delay	
+	decfsz thic1		    ; decrement until zero
+	bra thicc_delay		    ; branch back to delay
+	call delay2		    ; calls next delay
 	return
 	
-delay2	decfsz thic2 ; decrement until zero	
-	bra delay2
-	call delay3
+delay2	decfsz thic2		    ; decrement until zero	
+	bra delay2		    ; branch back to delay
+	call delay3		    ; calls next delay
 	return
 		
-delay3	decfsz thic3 ; decrement until zero	
-	bra delay3
+delay3	decfsz thic3		    ; decrement until zero	
+	bra delay3		    ; branch back to delay
 	return
 	
 chord_setup			    ; counter reset routine to reset the counter when it goes to zero 
-	movlw	upper(chordTable)	    ; address of data in PM
+	movlw	upper(chordTable)   ; address of data in PM
 	movwf	TBLPTRU		    ; load upper bits to TBLPTRU
-	movlw	high(chordTable)	    ; address of data in PM
+	movlw	high(chordTable)    ; address of data in PM
 	movwf	TBLPTRH		    ; load high byte to TBLPTRH
 	movlw	low(chordTable)	    ; address of data in PM
 	movwf	TBLPTRL		    ; load low byte to TBLPTRL
@@ -150,10 +151,10 @@ chord_setup			    ; counter reset routine to reset the counter when it goes to z
 	
 read_chord
 	tblrd*+			    ; move one byte from PM to TABLAT, increment TBLPRT
-	movff	TABLAT, PORTD	    ; move read data from TABLAT to (FSR0), increment FSR0	
+	movff	TABLAT, PORTD	    ; move read data from TABLAT to PORTD	
 	call	clock_pulse	    ; calls clock pulse to read in values
 	dcfsnz	counter		    ; count down to zero
-	call	chord_setup	    ; if counte is zero, the counter is reset
+	call	chord_setup	    ; if count is zero, the counter is reset
 	return
 	
 	end
