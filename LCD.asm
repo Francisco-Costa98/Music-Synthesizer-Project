@@ -137,8 +137,8 @@ lcdlp1	decf 	LCD_cnt_l,F	; no carry when 0x00 -> 0xff
 LCD_Clear
 	movlw	b'00000001'
 	call	LCD_Send_Byte_I	
-	call	LCD_delay_ms
-	call	LCD_delay_ms
+	;call	LCD_delay_ms
+	;call	LCD_delay_ms
 	return
 	
 LCD_Cursor_R
