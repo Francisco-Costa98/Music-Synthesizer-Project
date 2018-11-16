@@ -144,7 +144,7 @@ LCD_Clear
 LCD_Cursor_R
 	movlw	b'00010100'
 	call	LCD_Send_Byte_I	
-	call	LCD_delay
+	;call	LCD_delay
 	return
 	
 LCD_Cursor_L
