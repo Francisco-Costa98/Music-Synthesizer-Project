@@ -84,7 +84,7 @@ test0	movlw	.130
 	bra	test1
 	movlw	0x00
 	movwf	khigh
-	movlw	0x30 
+	movlw	0x7E 
 	movwf	klow
 	call	Write
 	goto	finish
@@ -181,7 +181,7 @@ test9	movlw	.68
 	bra	testA
 	movlw	0x00
 	movwf	khigh
-	movlw	0x85
+	movlw	0x86
 	movwf	klow
 	movlw	0x49
 	movwf	ascii_note
@@ -191,9 +191,9 @@ testA	movlw	.129
 	cpfseq	testreg
 	bra	testB
 	movlw	0x00
-	movwf	khigh
+	;movwf	khigh
 	movlw	0x63 
-	movwf	klow
+	;movwf	klow
 	movlw	0x01
 	movwf	a_test
 	call	Write_Song
@@ -294,13 +294,13 @@ Write				; a routine to write our klow values to port h
 
 Write_Song			; subroutine writes the word song when right key is pressed
 	movlw	0x53
-	call LCD_Send_Byte_D
+	;call LCD_Send_Byte_D
 	movlw	0x6f
-	call LCD_Send_Byte_D
+	;call LCD_Send_Byte_D
 	movlw	0x6e
-	call LCD_Send_Byte_D
+	;call LCD_Send_Byte_D
 	movlw	0x67
-	call LCD_Send_Byte_D
+	;call LCD_Send_Byte_D
 	
 	return
 	
