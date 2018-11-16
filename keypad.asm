@@ -14,7 +14,7 @@ a_test	res 1		    ; reserves space for a button test
 chord_test	res 1	    ; reserves space for chord test
 
 keypad    code		    ;main code
-
+    
 
 setup_keypad				; routine to set up keypad
 	banksel PADCFG1			; PADCFG1 is not in Access Bank!!
@@ -40,7 +40,7 @@ keypad_start			;routine to read keypad
 	movlw	0x5f
 	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
 	movlw	0x00		; initiliases test value to se if keypad is pressed
-	movwf	c_test		; tests if c is pressed
+	movwf	a_test		; tests if c is pressed
 	movwf	chord_test	; tests if chord is pressed
 	movlw	0x01
 	movwf	test		;moves into the test register
@@ -201,18 +201,18 @@ testA	movlw	.129
 testB	movlw	.132
 	cpfseq	testreg
 	bra	testC
-	movlw	0x01
+	movlw	0x00
 	movwf	khigh
-	movlw	0x8f
+	movlw	0x45
 	movwf	klow
 	call	Write
 	goto	finish
 testC	movlw	.136
 	cpfseq	testreg
 	bra	testD
-	movlw	0x00
+	movlw	0x01
 	movwf	khigh
-	movlw	0x21
+	movlw	0x8f
 	movwf	klow
 	movlw	0x01
 	movwf	chord_test
