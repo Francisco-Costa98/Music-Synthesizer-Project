@@ -25,7 +25,7 @@ setup	call	setup_keypad	    ; sets up keypad
 	bsf	EECON1, EEPGD	    ; access Flash program memory
 	movlw	0xFF		    ; gives 2 full loops of each note for song play 
 	movwf	fullsong	    ; stores it in the count checker
-	movlw	0x01
+	movlw	0x07
 	movwf	delayadrs1
 	call	song_setup
 	call	fsrload
@@ -55,16 +55,17 @@ start	clrf	LATC		    ; clears port c outputs
 int_hi	code 0x0008		    ; high vector, no low vector
 	btfss	PIR4,CCP4IF	    ; check that this is timer1 interrupt
 	retfie	FAST		    ; if not then return
-	;call	keypad_start	    ; calls keypad start routine
-	;movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
-	;movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
-	;tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
+	call	keypad_start	    ; calls keypad start routine
+	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
 	call	songloop	    ; calls song sub-routine if c is pressed
-	;call	songloop
-	;tstfsz	chord_test, 0	    ; checks if chord key is pressed on the keypad, if nothing is pressed no values are read
-	;call	read_chord	    ; plays chord if certain buttons are pressed
-	;tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
-	call	read		    ; reads values from table
+	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
+	bra	jump	    ; calls song sub-routine if c is pressed
+	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
+	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
+	tstfsz	chord_test, 0	    ; checks if chord key is pressed on the keypad, if nothing is pressed no values are read
+	call	read_chord	    ; plays chord if certain buttons are pressed
+	tstfsz	test, 0		    ; checks if nothing is pressed on the keypad, if nothing is pressed no values are read
+jump	call	read		    ; reads values from table
 	bcf	PIR4,CCP4IF	    ; clear interrupt flag
 	retfie	FAST		    ; fast return from interrupt
 	
@@ -120,7 +121,7 @@ songloop
 play_song			    ; subroutine to play song
 	movlw	0xFF		    ; gives 2 full loops of each note for song play
 	movwf	fullsong	    ; stores it in the count checker
-	movlw	0x01
+	movlw	0x07
 	movwf	delayadrs1
 	call	read_song	    ; calls next delay
 	;movwf delayadrs2	    ; initialises delay register
