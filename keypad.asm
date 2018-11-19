@@ -1,6 +1,6 @@
 #include p18f87k22.inc
 	extern LCD_Clear, LCD_Send_Byte_D, LCD_Cursor_R, LCD_Cursor_L
-	global setup_keypad, keypad_start, khigh, klow, test, a_test, chord_test
+	global setup_keypad, keypad_start, khigh, klow, test, a_test, chord_test, o_test, b_test
 	
 acs0    udata_acs	    ; reserves space for variables used
 test		res 1	    ; reserves space for test if zero
@@ -11,6 +11,8 @@ testreg		res 1	    ; reserves space for test
 keypad_delay	res 1	    ; reserves space for delay
 ascii_note	res 1	    ; reserves space for storing ascii character
 a_test		res 1	    ; reserves space for a button test
+o_test		res 1	    ; reserves space for a button test
+b_test		res 1	    ; reserves space for a button test
 chord_test	res 1	    ; reserves space for chord test
 
 keypad    code		    ;main code
@@ -36,11 +38,13 @@ setup_keypad				; routine to set up keypad
 	
 	
 keypad_start			;routine to read keypad
-	;call	LCD_Clear	;clears LCD
+
 	movlw	0x5f
 	movwf	ascii_note	;moves underscore to ascii writter if nothing is pressed
 	movlw	0x00		; initiliases test value to se if keypad is pressed
-	movwf	a_test		; tests if c is pressed
+	movwf	a_test		; tests if A is pressed
+	movwf	o_test		; tests if 0 is pressed
+	movwf	b_test		; tests if B is pressed
 	movwf	chord_test	; tests if chord is pressed
 	movlw	0x01
 	movwf	test		;moves into the test register
@@ -55,6 +59,7 @@ keypad_start			;routine to read keypad
 	sublw	0x0F		; subtracts value from 0F to see which bit its pressed
 	movwf	testreg1	;moves value of pressed bit to test register 1
 	
+	;****************** LOGIC FOR KEYBOARD********************
 	movlw	0xF0		; lights up other side of the keypad port (port J)
 	movwf	TRISJ, ACCESS	;moves value to portj
 	movlw	0x0A		;delay keypad register set up
@@ -82,11 +87,11 @@ keypad_start			;routine to read keypad
 test0	movlw	.130
 	cpfseq	testreg
 	bra	test1
-	movlw	0x00
-	movwf	khigh
-	movlw	0x7E 
-	movwf	klow
-	call	Write
+	movlw	0x01
+	movwf	o_test
+;	movlw	0x33
+;	movwf	ascii_note
+;	call	Write
 	goto	finish
 test1	movlw	.17
 	cpfseq	testreg
@@ -172,7 +177,7 @@ test8	movlw	.66
 	movwf	khigh
 	movlw	0x97
 	movwf	klow
-	movlw	0x48
+	movlw	0x41
 	movwf	ascii_note
 	call	Write
 	goto	finish
@@ -183,29 +188,27 @@ test9	movlw	.68
 	movwf	khigh
 	movlw	0x87
 	movwf	klow
-	movlw	0x49
+	movlw	0x42
 	movwf	ascii_note
 	call	Write
 	goto	finish
 testA	movlw	.129
 	cpfseq	testreg
 	bra	testB
-	movlw	0x00
-	;movwf	khigh
-	movlw	0x63 
-	;movwf	klow
 	movlw	0x01
 	movwf	a_test
-	call	Write_Song
+;	movlw	0x31
+;	movwf	ascii_note
+;	call	Write
 	goto	finish
 testB	movlw	.132
 	cpfseq	testreg
 	bra	testC
-	movlw	0x00
-	movwf	khigh
-	movlw	0x45
-	movwf	klow
-	call	Write
+	movlw	0x01
+	movwf	b_test
+;	movlw	0x32
+;	movwf	ascii_note
+;	call	Write
 	goto	finish
 testC	movlw	.136
 	cpfseq	testreg
@@ -218,7 +221,7 @@ testC	movlw	.136
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-	call	Write
+;	call	Write
 	goto	finish
 testD	movlw	.72
 	cpfseq	testreg
@@ -231,7 +234,7 @@ testD	movlw	.72
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-	call	Write
+;	call	Write
 	goto	finish
 testE	movlw	.40
 	cpfseq	testreg
@@ -244,7 +247,7 @@ testE	movlw	.40
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-	call	Write
+;	call	Write
 	goto	finish
 testF	movlw	.24
 	cpfseq	testreg
@@ -257,7 +260,7 @@ testF	movlw	.24
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-	call	Write
+;	call	Write
 	goto	finish
 	
 finish			    ; finish routine 
@@ -286,22 +289,22 @@ delay				; a delay subroutine
 Write				; a routine to write our klow values to port h 
 	movf	ascii_note
 	call	LCD_Send_Byte_D ; sends ascii to lcd
-	call	LCD_Cursor_R	; moves cursor right
+	;call	LCD_Cursor_R	; moves cursor right
 	movlw	0x0A		; sets up keypad_delay register
 	movwf	keypad_delay	; moves value into register
 	call	delay		; calls delay
 	movff	klow, PORTH	; moves klow value to port h
 	return
 
-Write_Song			; subroutine writes the word song when right key is pressed
-	movlw	0x53
-	;call LCD_Send_Byte_D
-	movlw	0x6f
-	;call LCD_Send_Byte_D
-	movlw	0x6e
-	;call LCD_Send_Byte_D
-	movlw	0x67
-	;call LCD_Send_Byte_D
+;Write_Song			; subroutine writes the word song when right key is pressed
+;	movlw	0x53
+;	call LCD_Send_Byte_D
+;	movlw	0x6f
+;	call LCD_Send_Byte_D
+;	movlw	0x6e
+;	call LCD_Send_Byte_D
+;	movlw	0x67
+;	call LCD_Send_Byte_D
 	
 	return
 	
