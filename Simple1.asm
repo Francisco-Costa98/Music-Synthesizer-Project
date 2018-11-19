@@ -1,16 +1,19 @@
 	#include p18f87k22.inc
 	
-	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, a_test, chord_test, o_test
+	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, a_test, chord_test, o_test, b_test
 
 acs0    udata_acs		    ; reserves space for variables used
 counter		res 1		    ; reserves one bite for counter 
 delayreg	res 1		    ; reserve one byte for delay register
+delayadrs0	res 1		    ; reserves byte for cascading delay register
+song_counter0	res 1		    ; reserves byte for song counter
+fullsong0	res 1
 delayadrs1	res 1		    ; reserves byte for cascading delay register
-song_counter	res 1		    ; reserves byte for song counter
-fullsong	res 1
-delayadrs2	res 1		    ; reserves byte for cascading delay register
 song_counter1	res 1		    ; reserves byte for song counter
 fullsong1	res 1
+delayadrs2	res 1		    ; reserves byte for cascading delay register
+song_counter2	res 1		    ; reserves byte for song counter
+fullsong2	res 1
  
 rst	code	0		    ; reset vector
 	goto	setup		    ; goes to code setup
@@ -26,28 +29,30 @@ setup	call	setup_keypad	    ; sets up keypad
 	bcf	EECON1, CFGS	    ; point to Flash program memory  
 	bsf	EECON1, EEPGD	    ; access Flash program memory
 	movlw	0xF0		    ; gives 2 full loops of each note for song play 
-	movwf	fullsong1	    ; stores it in the count checker
+	movwf	fullsong0	    ; stores it in the count checker
 	movlw	0x0A
-	movwf	delayadrs2
-	call	song_setup
-	call	fsrload
+	movwf	delayadrs0
+	call	song_setup0
+	call	fsrload0
 	call	song_setup1
 	call	fsrload1
+	call	song_setup2
+	call	fsrload2
 	movlw	0xF0		    ; gives 2 full loops of each note for song play 
-	movwf	fullsong	    ; stores it in the count checker
-	movlw	0x0A
-	movwf	delayadrs1
-;	call	song_setup
-;	call	fsrload
+	movwf	fullsong2	    ; stores it in the count checker
+	movlw	0x08
+	movwf	delayadrs2
 	call	counter_reset	    ; sets up table and counter for reading data
 	goto	start		    ; goes to start of code
 	; ******* My data **
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65	
-songTable db	0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0xfe, 0xc9, 0x97, 0x86, 0x86, 0xC9, 0x9f, 0x86, 0x7e, 0x7e , 0xc9, 0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0x97
-songTable1 db	0x54, 0x01, 0x54, 0x82
+songTable0 db	0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0xfe, 0xc9, 0x97, 0x86, 0x86, 0xC9, 0x9f, 0x86, 0x7e, 0x7e , 0xc9, 0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0x97
+songTable1 db	0x97, 0x71, 0x97, 0x71, 0x97, 0x71, 0x97, 0x9f, 0x97, 0x97, 0x9f, 0x97, 0x9f, 0xb3, 0xa9, 0xb3, 0xbe, 0xbe, 0xe2
+songTable2 db	0xe2, 0x71, 0x97, 0xa9, 0x54, 0x97, 0x59, 0x97,0xe2, 0x71, 0x97, 0xa9, 0x54, 0x97, 0x59, 0x97, 0xc9, 0x71, 0x97, 0xa9, 0x54, 0x97, 0x59, 0x97,0xc9, 0x71, 0x97, 0xa9, 0x54, 0x97, 0x59, 0x97 
 chordTable db	0xfc, 0xba, 0x7b, 0x41, 0x1d, 0x18, 0x2f, 0x58, 0x82, 0xa0, 0xaa, 0xa3, 0x92, 0x82, 0x7e, 0x87, 0x98, 0xa6, 0xa8, 0x96, 0x73, 0x47, 0x24, 0x17, 0x28, 0x56, 0x94, 0xcf, 0xf5
-	constant 	song2=0x130
-	constant	song1=0x100	
+	constant 	song0=0x100
+	constant	song1=0x130
+	constant	song2=0x160
 	
 start	clrf	LATD
 	clrf	LATC		    ; clears port c outputs	
@@ -70,12 +75,16 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	retfie	FAST		    ; if not then return
 	call	keypad_start	    ; calls keypad start routine
 	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad
-	call	songloop	    ; calls song sub-routine if A is pressed
+	call	songloop0	    ; calls song sub-routine if A is pressed
 	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
 	bra	jump		    ; calls song sub-routine if A is pressed
 	tstfsz	o_test, 0	    ; checks if a is pressed on the keypad
 	call	songloop1	    ; calls song sub-routine if 0 is pressed
 	tstfsz	o_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
+	bra	jump		     ; calls song sub-routine if 0 is pressed
+	tstfsz	b_test, 0	    ; checks if a is pressed on the keypad
+	call	songloop2	    ; calls song sub-routine if 0 is pressed
+	tstfsz	b_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
 	bra	jump		     ; calls song sub-routine if 0 is pressed
 	movff	khigh, CCPR4H	    ; from keypad start routine moves value of khigh to CCP register
 	movff	klow, CCPR4L	    ; from keypad start routine moves value of klow to CCP register
@@ -131,52 +140,52 @@ read_chord
 	
 ; ********* PLAYS BEETHOVEN SONG *************	
 	
-songloop
-	dcfsnz	fullsong			     
-	call	song_delay
+songloop0
+	dcfsnz	fullsong0			     
+	call	song_delay0
 	return
 	
-play_song			    ; subroutine to play song
+play_song0			    ; subroutine to play song
 	movlw	0xF0		    ; gives 2 full loops of each note for song play
-	movwf	fullsong	    ; stores it in the count checker
+	movwf	fullsong0	    ; stores it in the count checker
 	movlw	0x0A
-	movwf	delayadrs1
-	call	read_song	    ; calls next delay
+	movwf	delayadrs0
+	call	read_song0	    ; calls next delay
 	return
 	
 
-read_song			    ; read routine to read values from table
+read_song0			    ; read routine to read values from table
 	movff	POSTINC0, CCPR4	    ; move read data from FSR0 to CCPR4 , increment FSR0
 	movlw	0x00
 	movwf	CCPR4H
-	dcfsnz	song_counter	    ; count down to zero
-	call	song_counterreset   ; if counter is zero, the counter is reset
+	dcfsnz	song_counter0	    ; count down to zero
+	call	song_counterreset0   ; if counter is zero, the counter is reset
 	return	
 		
-song_setup 	
-	lfsr	FSR0, song1	; Load FSR0 with address in RAM	
-	movlw	upper(songTable); address of data in PM
+song_setup0 	
+	lfsr	FSR0, song0	; Load FSR0 with address in RAM	
+	movlw	upper(songTable0); address of data in PM
 	movwf	TBLPTRU		; load upper bits to TBLPTRU
-	movlw	high(songTable)	; address of data in PM
+	movlw	high(songTable0)	; address of data in PM
 	movwf	TBLPTRH		; load high byte to TBLPTRH
-	movlw	low(songTable)	; address of data in PM
+	movlw	low(songTable0)	; address of data in PM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
 	movlw	.30		; 31 notes to read
-	movwf 	song_counter	; our counter register
+	movwf 	song_counter0	; our counter register
 	return
 	
-fsrload 
+fsrload0 
 	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move read data from TABLAT to (FSR0), increment FSR0	
-	decfsz	song_counter	; count down to zero
-	bra	fsrload		; keep going until finished
-	call	song_counterreset
+	decfsz	song_counter0	; count down to zero
+	bra	fsrload0	; keep going until finished
+	call	song_counterreset0
 	return
 	
-song_counterreset
+song_counterreset0
 	movlw	.30		; 5 notes to read
-	movwf 	song_counter	; our counter register
-	lfsr	FSR0, song1
+	movwf 	song_counter0	; our counter register
+	lfsr	FSR0, song0
 	return
 		
 ; ********* PLAYS IMPERIAL MARCH *************	
@@ -189,8 +198,8 @@ songloop1
 play_song1			    ; subroutine to play song
 	movlw	0xF0		    ; gives 2 full loops of each note for song play
 	movwf	fullsong1	    ; stores it in the count checker
-	movlw	0x0A
-	movwf	delayadrs2
+	movlw	0x08
+	movwf	delayadrs1
 	call	read_song1	    ; calls next delay
 	return
 	
@@ -204,14 +213,14 @@ read_song1			    ; read routine to read values from table
 	return	
 		
 song_setup1	
-	lfsr	FSR1, song2	; Load FSR0 with address in RAM	
+	lfsr	FSR1, song1	; Load FSR0 with address in RAM	
 	movlw	upper(songTable1); address of data in PM
 	movwf	TBLPTRU		; load upper bits to TBLPTRU
 	movlw	high(songTable1)	; address of data in PM
 	movwf	TBLPTRH		; load high byte to TBLPTRH
 	movlw	low(songTable1)	; address of data in PM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
-	movlw	.4		; 5 notes to read
+	movlw	.19		; 5 notes to read
 	movwf 	song_counter1	; our counter register
 	return
 	
@@ -224,9 +233,59 @@ fsrload1
 	return
 	
 song_counterreset1
-	movlw	.4		; 5 notes to read
+	movlw	.19		; 5 notes to read
 	movwf 	song_counter1	; our counter register
-	lfsr	FSR1, song2
+	lfsr	FSR1, song1
+	return
+	
+; ********* PLAYS SWEET CHILD O'MINE *************	
+	
+songloop2
+	dcfsnz	fullsong2			     
+	call	song_delay2
+	return
+	
+play_song2			    ; subroutine to play song
+	movlw	0xF0		    ; gives 2 full loops of each note for song play
+	movwf	fullsong2	    ; stores it in the count checker
+	movlw	0x08
+	movwf	delayadrs2
+	call	read_song2	    ; calls next delay
+	return
+	
+
+read_song2			    ; read routine to read values from table
+	movff	POSTINC2, CCPR4	    ; move read data from FSR0 to CCPR4 , increment FSR0
+	movlw	0x00
+	movwf	CCPR4H
+	dcfsnz	song_counter2	    ; count down to zero
+	call	song_counterreset2   ; if counte is zero, the counter is reset
+	return	
+		
+song_setup2	
+	lfsr	FSR2, song2	; Load FSR0 with address in RAM	
+	movlw	upper(songTable2); address of data in PM
+	movwf	TBLPTRU		; load upper bits to TBLPTRU
+	movlw	high(songTable2)	; address of data in PM
+	movwf	TBLPTRH		; load high byte to TBLPTRH
+	movlw	low(songTable2)	; address of data in PM
+	movwf	TBLPTRL		; load low byte to TBLPTRL
+	movlw	.32		; 5 notes to read
+	movwf 	song_counter2	; our counter register
+	return
+	
+fsrload2
+	tblrd*+			; move one byte from PM to TABLAT, increment TBLPRT
+	movff	TABLAT, POSTINC2; move read data from TABLAT to (FSR1), increment FSR1
+	decfsz	song_counter2	; count down to zero
+	bra	fsrload2		; keep going until finished
+	call	song_counterreset2
+	return
+	
+song_counterreset2
+	movlw	.32		; 5 notes to read
+	movwf 	song_counter2	; our counter register
+	lfsr	FSR2, song2
 	return
 	
 ; ********* DELAYS AND CLOCK PULSES********
@@ -244,13 +303,18 @@ clk_delay			    ; clock delay routine
 	bra clk_delay		    ; loops until register is zero
 	return
 
-song_delay
-	dcfsnz delayadrs1	    ; decrement until zero
-	call play_song		    ; branch back to delay
+song_delay0
+	dcfsnz delayadrs0	    ; decrement until zero
+	call play_song0		    ; branch back to delay
 	return
 	
 song_delay1
-	dcfsnz delayadrs2	    ; decrement until zero
+	dcfsnz delayadrs1	    ; decrement until zero
 	call play_song1		    ; branch back to delay
+	return
+
+song_delay2
+	dcfsnz delayadrs2	    ; decrement until zero
+	call play_song2		    ; branch back to delay
 	return
 	end
