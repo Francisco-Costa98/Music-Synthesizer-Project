@@ -192,7 +192,7 @@ song_counterreset0
 	lfsr	FSR0, song0
 	return
 		
-; ********* PLAYS IMPERIAL MARCH *************	
+; ********* PLAYS CANTINA SONG *************	
 	
 songloop1
 	dcfsnz	fullsong1			     
