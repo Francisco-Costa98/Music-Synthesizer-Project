@@ -3,14 +3,14 @@
 	global setup_keypad, keypad_start, khigh, klow, test, a_test, chord_test
 	
 acs0    udata_acs	    ; reserves space for variables used
-test	res 1		    ; reserves space for test if zero
-khigh	res 1		    ; reserves space for frequencies
-klow	res 1		    ; reserves space for frequencies
-testreg1 res 1		    ; reserves space for test
-testreg	res 1		    ; reserves space for test
+test		res 1	    ; reserves space for test if zero
+khigh		res 1	    ; reserves space for frequencies
+klow		res 1	    ; reserves space for frequencies
+testreg1	res 1	    ; reserves space for test
+testreg		res 1	    ; reserves space for test
 keypad_delay	res 1	    ; reserves space for delay
-ascii_note  res 1	    ; reserves space for storing ascii character
-a_test	res 1		    ; reserves space for a button test
+ascii_note	res 1	    ; reserves space for storing ascii character
+a_test		res 1	    ; reserves space for a button test
 chord_test	res 1	    ; reserves space for chord test
 
 keypad    code		    ;main code
@@ -181,7 +181,7 @@ test9	movlw	.68
 	bra	testA
 	movlw	0x00
 	movwf	khigh
-	movlw	0x86
+	movlw	0x87
 	movwf	klow
 	movlw	0x49
 	movwf	ascii_note
@@ -276,12 +276,13 @@ finish2			    ; finish two routine
 	return		    ; returns to main code
 	
 
-	
+; ******* DELAYS **********
 delay				; a delay subroutine 
 	decfsz	keypad_delay	; decrement register until zero
 	bra delay		; loops until delay register is zero
 	return
 	
+; ********** FUNCTIONS WHICH WRITE TO LCD ********	
 Write				; a routine to write our klow values to port h 
 	movf	ascii_note
 	call	LCD_Send_Byte_D ; sends ascii to lcd
