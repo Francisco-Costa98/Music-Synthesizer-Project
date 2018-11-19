@@ -3,13 +3,12 @@
 	extern  setup_keypad, keypad_start, khigh, klow, test, LCD_Setup, a_test, chord_test
 
 acs0    udata_acs		    ; reserves space for variables used
-counter res 1		    ; reserves one bite for counter 
-delayreg res 1		    ; reserve one byte for delay register
-delayadrs1 res 1		    ; reserves byte for cascading delay register
-delayadrs2 res 1		    ; reserves byte for cascading delay register
-delayadrs3 res 1		    ; reserves byte for cascading delay register
-song_counter res 1	    ; reserves byte for song counter
-fullsong    res 1
+counter		res 1		    ; reserves one bite for counter 
+delayreg	res 1		    ; reserve one byte for delay register
+delayadrs1	res 1		    ; reserves byte for cascading delay register
+song_counter	res 1		    ; reserves byte for song counter
+fullsong	res 1
+;low_fileregister res 1
  
 rst	code	0		    ; reset vector
 	goto	setup		    ; goes to code setup
@@ -34,8 +33,8 @@ setup	call	setup_keypad	    ; sets up keypad
 	goto	start		    ; goes to start of code
 	; ******* My data **
 myTable  db	0x7f, 0x99, 0xb3, 0xca, 0xdd, 0xed, 0xf8, 0xfd, 0xfd, 0xf8, 0xed, 0xdd, 0xca, 0xb3, 0x99, 0x7f, 0x65, 0x4b, 0x34, 0x21, 0x11, 0x06, 0x01, 0x01, 0x06, 0x11, 0x21, 0x34, 0x4b, 0x65	
-songTable db	0x0079, 
- ;0x006A, 0x0064, 0x006A, 0x0064, 0x0086, 0x0071, 0x007E, 0x0097, 0x0097, 0x00FE, 0x00C9, 0x0097, 0x0086, 0x0086, 0x0029, 0x009F, 0x0086, 0x007E, 0x007E, 0x00C9, 0x0064, 0x006A, 0x0064, 0x006A, 0x0064, 0x0086, 0x0071, 0x007E, 0x0097, 0x0097
+songTable db	0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0xfe, 0xc9, 0x97, 0x86, 0x86, 0x29, 0x9f, 0x86, 0x7e, 0x7e , 0xc9, 0x64, 0x6a, 0x64, 0x6a, 0x64, 0x86, 0x71, 0x7e, 0x97, 0x97
+ ;0x0164, 0x016A, 0x0164, 0x016A, 0x0164, ,0x0186, 0x0171, 0x017E, 0x0197, 0x0197, 0x01FE, 0x01C9, 0x0197, 0x0186, 0x0186, 0x0129, 0x019F, 0x0186, 0x017E, 0x017E, 0x01C9, 0x0164, 0x016A, 0x0164, 0x016A, 0x0164, 0x0186, 0x0171, 0x017E, 0x0197, 0x0197
 chordTable db	0xfc, 0xba, 0x7b, 0x41, 0x1d, 0x18, 0x2f, 0x58, 0x82, 0xa0, 0xaa, 0xa3, 0x92, 0x82, 0x7e, 0x87, 0x98, 0xa6, 0xa8, 0x96, 0x73, 0x47, 0x24, 0x17, 0x28, 0x56, 0x94, 0xcf, 0xf5
 	constant 	song1=0x400
 	
@@ -59,7 +58,7 @@ int_hi	code 0x0008		    ; high vector, no low vector
 	btfss	PIR4,CCP4IF	    ; check that this is timer1 interrupt
 	retfie	FAST		    ; if not then return
 	call	keypad_start	    ; calls keypad start routine
-	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
+	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad
 	call	songloop	    ; calls song sub-routine if c is pressed
 	tstfsz	a_test, 0	    ; checks if a is pressed on the keypad, if nothing is pressed no values are read
 	bra	jump		    ; calls song sub-routine if c is pressed
@@ -132,7 +131,11 @@ play_song			    ; subroutine to play song
 	
 
 read_song			    ; read routine to read values from table
-	movff	POSTINC0, CCPR4	    ; move read data from TABLAT to (FSR0), increment FSR0
+;	movf	POSTINC0, w
+;	movwf	low_fileregister
+	movff	POSTINC0, CCPR4	    ; move read data from FSR0 to CCPR4 , increment FSR0
+	movlw	0x00
+	movwf	CCPR4H
 	dcfsnz	song_counter	    ; count down to zero
 	call	song_counterreset   ; if counte is zero, the counter is reset
 	return	
@@ -145,7 +148,7 @@ song_setup
 	movwf	TBLPTRH		; load high byte to TBLPTRH
 	movlw	low(songTable)	; address of data in PM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
-	movlw	.1		; 5 notes to read
+	movlw	.31		; 5 notes to read
 	movwf 	song_counter	; our counter register
 	return
 	
@@ -158,28 +161,13 @@ fsrload
 	return
 	
 song_counterreset
-	movlw	.1		; 5 notes to read
+	movlw	.31		; 5 notes to read
 	movwf 	song_counter	; our counter register
 	lfsr	FSR0, song1
 	return
 		
 
 ; ********* DELAYS AND CLOCK PULSES********
-	
-big_delay	
-	decfsz delayadrs1	    ; decrement until zero
-	bra big_delay		    ; branch back to delay
-	call delay2		    ; calls next delay
-	return	
-	
-delay2	decfsz delayadrs2	    ; decrement until zero	
-	bra delay2		    ; branch back to delay
-	call delay3		    ; calls next delay
-	return
-		
-delay3	decfsz delayadrs3	    ; decrement until zero	
-	bra delay3		    ; branch back to delay
-	return
 	
 clock_pulse			    ; clock pulse routine to make DAC read in values
 	bcf	PORTC, 0	    ; clears clock enable bit
