@@ -84,14 +84,12 @@ keypad_start			;routine to read keypad
 	; if there is a match we move the required khigh and klow values to what frequency we
 	; want that number to correspond to 
 	
+; ********************** TESTING FOR KEY ***************************
 test0	movlw	.130
 	cpfseq	testreg
 	bra	test1
 	movlw	0x01
 	movwf	o_test
-;	movlw	0x33
-;	movwf	ascii_note
-;	call	Write
 	goto	finish
 test1	movlw	.17
 	cpfseq	testreg
@@ -197,18 +195,12 @@ testA	movlw	.129
 	bra	testB
 	movlw	0x01
 	movwf	a_test
-;	movlw	0x31
-;	movwf	ascii_note
-;	call	Write
 	goto	finish
 testB	movlw	.132
 	cpfseq	testreg
 	bra	testC
 	movlw	0x01
 	movwf	b_test
-;	movlw	0x32
-;	movwf	ascii_note
-;	call	Write
 	goto	finish
 testC	movlw	.136
 	cpfseq	testreg
@@ -221,7 +213,6 @@ testC	movlw	.136
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-;	call	Write
 	goto	finish
 testD	movlw	.72
 	cpfseq	testreg
@@ -234,7 +225,6 @@ testD	movlw	.72
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-;	call	Write
 	goto	finish
 testE	movlw	.40
 	cpfseq	testreg
@@ -247,7 +237,6 @@ testE	movlw	.40
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-;	call	Write
 	goto	finish
 testF	movlw	.24
 	cpfseq	testreg
@@ -260,7 +249,6 @@ testF	movlw	.24
 	movwf	chord_test
 	movlw	0x00
 	movwf	test
-;	call	Write
 	goto	finish
 	
 finish			    ; finish routine 
@@ -285,27 +273,14 @@ delay				; a delay subroutine
 	bra delay		; loops until delay register is zero
 	return
 	
-; ********** FUNCTIONS WHICH WRITE TO LCD ********	
+; ********** FUNCTION WHICH WRITE TO LCD ********	
 Write				; a routine to write our klow values to port h 
 	movf	ascii_note
 	call	LCD_Send_Byte_D ; sends ascii to lcd
-	;call	LCD_Cursor_R	; moves cursor right
 	movlw	0x0A		; sets up keypad_delay register
 	movwf	keypad_delay	; moves value into register
 	call	delay		; calls delay
 	movff	klow, PORTH	; moves klow value to port h
-	return
-
-;Write_Song			; subroutine writes the word song when right key is pressed
-;	movlw	0x53
-;	call LCD_Send_Byte_D
-;	movlw	0x6f
-;	call LCD_Send_Byte_D
-;	movlw	0x6e
-;	call LCD_Send_Byte_D
-;	movlw	0x67
-;	call LCD_Send_Byte_D
-	
 	return
 	
     end
