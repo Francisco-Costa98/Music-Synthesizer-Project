@@ -1,6 +1,6 @@
 # Microprocessors
-Repository for Physics Year 3 microprocessors lab
+Repository for Francisco Costa and Tom Jeffries Physics Year 3 microprocessors project
 
-A simple assembly program for PIC18 microprocessor
+A assembly program for PIC18 microprocessor
 
-Uses simple interrupts from timer0 to count up on PORTD
+Uses interrupts from timer1 along with various hardware and external features to play notes, chords and songs
